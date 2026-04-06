@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APEL Prep — Auth</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Syne:wght@800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080e1a;
+      --surface: #0f1928;
+      --surface2: #172134;
+      --gold: #e8a020;
+      --gold2: #ffc444;
+      --body: #b8ccdf;
+      --muted: #4e6480;
+      --red: #ff5c5c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--body);
+      font-family: 'Instrument Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+    }
+    h1, h2, h3, .syne { font-family: 'Syne', sans-serif; font-weight: 800; }
+    
+    .hero-panel {
+      flex: 1;
+      background: linear-gradient(135deg, var(--surface) 0%, var(--bg) 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 80px;
+      border-right: 1px solid rgba(255,255,255,0.07);
+    }
+    .hero-panel h1 {
+      font-size: 4rem;
+      color: var(--gold);
+      line-height: 1;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+    }
+    .hero-panel p {
+      font-size: 1.25rem;
+      max-width: 500px;
+      line-height: 1.6;
+      color: var(--body);
+    }
+    
+    .auth-panel {
+      width: 500px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px;
+      background: var(--bg);
+    }
+    .auth-card {
+      background: var(--surface);
+      padding: 40px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.07);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    .auth-card h2 {
+      font-size: 2rem;
+      margin-bottom: 8px;
+      color: white;
+    }
+    .auth-card p {
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+    
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--body);
+    }
+    input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 14px 16px;
+      border-radius: 10px;
+      color: white;
+      font-family: inherit;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+    
+    button {
+      width: 100%;
+      padding: 16px;
+      border-radius: 10px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.2s, opacity 0.2s;
+      border: none;
+    }
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+    
+    .btn-primary { background: var(--gold); color: var(--bg); }
+    .btn-google {
+      background: white;
+      color: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 24px 0;
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
+    .divider::before, .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.07);
+    }
+    
+    .toggle-view {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 0.875rem;
+    }
+    .toggle-view a {
+      color: var(--gold);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .toggle-view a:hover { text-decoration: underline; }
+    
+    .error-msg {
+      color: var(--red);
+      font-size: 0.875rem;
+      margin-top: 12px;
+      display: none;
+    }
+    
+    .loading-spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0,0,0,0.1);
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    [data-view] { display: none; }
+    [data-view].active { display: block; }
+    
+    @media (max-width: 1000px) {
+      body { flex-direction: column; }
+      .hero-panel { padding: 40px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.07); }
+      .hero-panel h1 { font-size: 3rem; }
+      .auth-panel { width: 100%; padding: 40px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="hero-panel">
+    <h1>APEL<br>PREP</h1>
+    <p>Master the MQA APEL.A Degree Level T6 exam with our comprehensive question bank and AI-powered tutor.</p>
+  </div>
+  
+  <div class="auth-panel">
+    <div class="auth-card">
+      <!-- SIGN IN VIEW -->
+      <div data-view="signin" class="active">
+        <h2>Welcome Back</h2>
+        <p>Sign in to continue your preparation.</p>
+        
+        <button class="btn-google" id="google-btn">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" alt="">
+          Continue with Google
+        </button>
+        
+        <div class="divider">or use email</div>
+        
+        <form id="signin-form">
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="signin-email" required placeholder="name@example.com">
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="signin-password" required placeholder="••••••••">
+          </div>
+          <button type="submit" class="btn-primary">Sign In</button>
+        </form>
+        
+        <div class="error-msg" id="signin-error"></div>
+        
+        <div class="toggle-view">
+          Don't have an account? <a href="#" onclick="showView('register')">Register</a><br>
+          <a href="#" onclick="showView('forgot')" style="margin-top: 8px; display: inline-block;">Forgot password?</a>
+        </div>
+      </div>
+      
+      <!-- REGISTER VIEW -->
+      <div data-view="register">
+        <h2>Create Account</h2>
+        <p>Start your journey to a degree today.</p>
+        
+        <form id="register-form">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="register-name" required placeholder="John Doe">
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="register-email" required placeholder="name@example.com">
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="register-password" required placeholder="••••••••">
+          </div>
+          <button type="submit" class="btn-primary">Create Account</button>
+        </form>
+        
+        <div class="error-msg" id="register-error"></div>
+        
+        <div class="toggle-view">
+          Already have an account? <a href="#" onclick="showView('signin')">Sign In</a>
+        </div>
+      </div>
+      
+      <!-- FORGOT VIEW -->
+      <div data-view="forgot">
+        <h2>Reset Password</h2>
+        <p>We'll send a reset link to your email.</p>
+        
+        <form id="forgot-form">
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="forgot-email" required placeholder="name@example.com">
+          </div>
+          <button type="submit" class="btn-primary">Send Reset Link</button>
+        </form>
+        
+        <div class="error-msg" id="forgot-error" style="color: var(--body)"></div>
+        
+        <div class="toggle-view">
+          Back to <a href="#" onclick="showView('signin')">Sign In</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as fs from './js/firebase-service.js';
+
+    window.showView = (view) => {
+      document.querySelectorAll('[data-view]').forEach(v => v.classList.remove('active'));
+      document.querySelector(`[data-view="${view}"]`).classList.add('active');
+      document.querySelectorAll('.error-msg').forEach(e => e.style.display = 'none');
+    };
+
+    const mapError = (code) => {
+      switch(code) {
+        case 'auth/user-not-found': return 'No account found with this email.';
+        case 'auth/wrong-password': return 'Incorrect password.';
+        case 'auth/email-already-in-use': return 'Email already registered.';
+        case 'auth/weak-password': return 'Password should be at least 6 characters.';
+        case 'auth/invalid-email': return 'Invalid email address.';
+        default: return 'An error occurred. Please try again.';
+      }
+    };
+
+    // Check if already logged in
+    fs.onAuthChange(user => {
+      if (user) window.location.href = '/app';
+    });
+
+    // Google Sign In
+    document.getElementById('google-btn').onclick = async () => {
+      try {
+        await fs.signInGoogle();
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    // Email Sign In
+    document.getElementById('signin-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('signin-email').value;
+      const pass = document.getElementById('signin-password').value;
+      const err = document.getElementById('signin-error');
+      try {
+        await fs.signInEmail(email, pass);
+      } catch (e) {
+        err.textContent = mapError(e.code);
+        err.style.display = 'block';
+      }
+    };
+
+    // Register
+    document.getElementById('register-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('register-name').value;
+      const email = document.getElementById('register-email').value;
+      const pass = document.getElementById('register-password').value;
+      const err = document.getElementById('register-error');
+      try {
+        await fs.registerEmail(email, pass, name);
+      } catch (e) {
+        err.textContent = mapError(e.code);
+        err.style.display = 'block';
+      }
+    };
+
+    // Forgot
+    document.getElementById('forgot-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('forgot-email').value;
+      const err = document.getElementById('forgot-error');
+      try {
+        await fs.resetPassword(email);
+        err.textContent = 'Reset link sent! Check your inbox.';
+        err.style.color = 'var(--gold)';
+        err.style.display = 'block';
+      } catch (e) {
+        err.textContent = mapError(e.code);
+        err.style.color = 'var(--red)';
+        err.style.display = 'block';
+      }
+    };
+  </script>
+</body>
+</html>
